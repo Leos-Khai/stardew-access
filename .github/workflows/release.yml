@@ -1,8 +1,15 @@
 name: Release
 
+# Refs: https://github.com/nektos/act/issues/329#issuecomment-1905955589
+
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: 'The semantic release version'
+        required: false
+        default: 'auto-fetch'
+        type: string
       pre-release:
         description: 'Set as pre-release i.e., beta or alpha'
         required: false
@@ -12,16 +19,21 @@ on:
           - auto
           - true
           - false
+      set-latest:
+        description: 'Set as latest on github and nexus'
+        required: false
+        default: false
+        type: boolean
       nexus-upload:
         description: 'Whether to upload on nexus or not'
         required: false
         default: true
         type: boolean
-      version:
-        description: 'The semantic release version'
+      nexus-main-vortex:
+        description: 'Set as main vortex file on nexus'
         required: false
-        default: 'auto-fetch'
-        type: string
+        default: false
+        type: boolean
 
 jobs:
   build:
@@ -34,6 +46,10 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+    env:
+      NEXUSMOD_API_KEY: ${{ secrets.NEXUSMOD_API_KEY }}
+      NEXUSMOD_COOKIE_SID_DEVELOP: ${{ secrets.NEXUSMOD_COOKIE_SID_DEVELOP }}
+      NEXUSMOD_MODID: 16205
     steps:
       - name: Pull source code
         uses: actions/checkout@v4
@@ -42,7 +58,55 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: stardew-access-nightly
+          path: act_out/
 
-      - name: Display the downloaded artifact
-        run: ls -la
+      - name: Set environment variables
+        run: |
+          for f in act_out/*zip; do if [[ $f == *'debug'* ]]; then echo DEBUG_FILE=$f >> $GITHUB_ENV; else echo MAIN_FILE=$f >> $GITHUB_ENV; fi; done
+          if ${{ inputs.version != 'auto-fetch' }}; then RELEASE_TAG=${{ inputs.version }};
+          else RELEASE_TAG=$( jq -r '.Version' ./stardew-access/manifest.json ); fi
+          echo RELEASE_TAG=$RELEASE_TAG >> $GITHUB_ENV
+          if ${{ inputs.pre-release == 'auto' }}; then if [[ $RELEASE_TAG == *'beta'* ]] || [[ $RELEASE_TAG == *'alpha'* ]]; then PRE_RELEASE=true; else PRE_RELEASE=false; fi;
+          else if ${{ inputs.pre-release == 'true' }}; then PRE_RELEASE=true; else PRE_RELEASE=false; fi; fi
+          echo PRE_RELEASE=$PRE_RELEASE >> $GITHUB_ENV
+          echo NEXUSMOD_NAME=Stardew Access $RELEASE_TAG >> $GITHUB_ENV
+          echo "NEXUSMOD_VERSION=$( echo $RELEASE_TAG | cut -c 2- )" >> $GITHUB_ENV
+          echo "GH_TITLE=$( if $PRE_RELEASE; then echo 'Beta '; fi )Release ${RELEASE_TAG}" >> $GITHUB_ENV
 
+      - name: Test envs
+        run: |
+          echo ${{ env.MAIN_FILE }}
+          echo ${{ env.DEBUG_FILE }}
+          echo ${{ env.RELEASE_TAG }}
+          echo ${{ env.PRE_RELEASE }}
+          echo ${{ env.GH_TITLE }}
+          echo ${{ env.NEXUSMOD_NAME }}
+          echo ${{ env.NEXUSMOD_VERSION }}
+          echo ${{ env.NEXUSMOD_MODID }}
+
+      - name: Upload on GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          body: This is temporary and will changed soon...
+          prerelease: ${{ env.PRE_RELEASE }}
+          files: |
+            ${{ env.MAIN_FILE }}
+            ${{ env.DEBUG_FILE }}
+          name: ${{ env.GH_NAME }}
+          fail_on_unmatched_files: true
+          tag_name: ${{ env.RELEASE_TAG }}
+          generate_release_notes: true
+          make_latest: ${{ inputs.set-latest }}
+
+      - name: Install dotnet
+        if: inputs.nexus-upload
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Upload on Nexus
+        if: inputs.nexus-upload
+        run: |
+          dotnet tool install -g Digitalroot.ModUploader
+          /root/.dotnet/tools/drmu nexusmods check
+          /root/.dotnet/tools/drmu nexusmods upload ${{ env.NEXUSMOD_MODID }} "${{ env.MAIN_FILE }}" -f "${{ env.NEXUS_NAME }}" -v "${{ env.NEXUSMOD_VERSION }}" -g stardewvalley -t Main -dmfu ${{ inputs.set-latest && '' || '-dvu' }} ${{ inputs.nexus-main-vortex && '' || '-dmv' }}
