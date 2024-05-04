@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  workflow-dispatch:
+    inputs:
+      pre-release:
+        description: 'Set as pre-release i.e., beta or alpha'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - true
+          - false
+      nexus-upload:
+        description: 'Whether to upload on nexus or not'
+        required: false
+        default: true
+        type: boolean
+      version:
+        description: 'The semantic release version'
+        required: false
+        default: 'auto-fetch'
+        type: string
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflow/build.yml
+
+  publish:
+    name: Publish
+    needs: build
+    permission:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull source code
+        uses: actions/checkout@v4
+
+      - name: Download artifacts from build workflow run
+        uses: actions/download-artifact@v4
+        with:
+          name: stardew-access-nigthly
+
+      - name: Display the downloaded artifact
+        run: ls -la
+
