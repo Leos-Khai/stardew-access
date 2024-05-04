@@ -73,6 +73,12 @@ jobs:
           echo "NEXUSMOD_VERSION=$( echo $RELEASE_TAG | cut -c 2- )" >> $GITHUB_ENV
           echo "GH_TITLE=$( if $PRE_RELEASE; then echo 'Beta '; fi )Release ${RELEASE_TAG}" >> $GITHUB_ENV
 
+      - name: Rename build zips if necessary
+        if: inputs.version != 'auto-fetch'
+        run: |
+          for f in act_out/*zip; do fname=act_out/stardew-access-$( echo ${{ env.RELEASE_TAG }} | cut -c 2- )$( if [[ $f == *'debug'* ]]; then echo -debug; fi ).zip; echo $fname; mv "${f}" "${fname}"; done
+          for f in act_out/*zip; do if [[ $f == *'debug'* ]]; then echo DEBUG_FILE=$f >> $GITHUB_ENV; else echo MAIN_FILE=$f >> $GITHUB_ENV; fi; done
+
       - name: Test envs
         run: |
           echo ${{ env.MAIN_FILE }}
@@ -108,5 +114,5 @@ jobs:
         if: inputs.nexus-upload
         run: |
           dotnet tool install -g Digitalroot.ModUploader
-          /root/.dotnet/tools/drmu nexusmods check
-          /root/.dotnet/tools/drmu nexusmods upload ${{ env.NEXUSMOD_MODID }} "${{ env.MAIN_FILE }}" -f "${{ env.NEXUS_NAME }}" -v "${{ env.NEXUSMOD_VERSION }}" -g stardewvalley -t Main -dmfu ${{ inputs.set-latest && '' || '-dvu' }} ${{ inputs.nexus-main-vortex && '' || '-dmv' }}
+          drmu nexusmods check
+          drmu nexusmods upload ${{ env.NEXUSMOD_MODID }} "${{ env.MAIN_FILE }}" -f "${{ env.NEXUS_NAME }}" -v "${{ env.NEXUSMOD_VERSION }}" -g stardewvalley -t Main -dmfu ${{ inputs.set-latest && '' || '-dvu' }} ${{ inputs.nexus-main-vortex && '' || '-dmv' }}
