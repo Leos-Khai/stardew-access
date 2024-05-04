@@ -24,15 +24,20 @@ on:
         required: false
         default: false
         type: boolean
-      nexus-upload:
-        description: 'Whether to upload on nexus or not'
-        required: false
-        default: true
-        type: boolean
       nexus-main-vortex:
         description: 'Set as main vortex file on nexus'
         required: false
         default: false
+        type: boolean
+      github-upload:
+        description: 'Whether to upload on github or not'
+        required: false
+        default: true
+        type: boolean
+      nexus-upload:
+        description: 'Whether to upload on nexus or not'
+        required: false
+        default: true
         type: boolean
 
 jobs:
@@ -91,6 +96,7 @@ jobs:
           echo ${{ env.NEXUSMOD_MODID }}
 
       - name: Upload on GitHub
+        if: inputs.github-upload
         uses: softprops/action-gh-release@v2
         with:
           body: This is temporary and will changed soon...
@@ -115,4 +121,4 @@ jobs:
         run: |
           dotnet tool install -g Digitalroot.ModUploader
           drmu nexusmods check
-          drmu nexusmods upload ${{ env.NEXUSMOD_MODID }} "${{ env.MAIN_FILE }}" -f "${{ env.NEXUS_NAME }}" -v "${{ env.NEXUSMOD_VERSION }}" -g stardewvalley -t Main -dmfu ${{ inputs.set-latest && '' || '-dvu' }} ${{ inputs.nexus-main-vortex && '' || '-dmv' }}
+          drmu nexusmods upload ${{ env.NEXUSMOD_MODID }} "${{ env.MAIN_FILE }}" -f "${{ env.NEXUSMOD_NAME }}" -v "${{ env.NEXUSMOD_VERSION }}" -g stardewvalley -t Main -dmfu ${{ inputs.set-latest && '' || '-dvu' }} ${{ inputs.nexus-main-vortex && '' || '-dmv' }}
