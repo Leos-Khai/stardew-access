@@ -5,6 +5,8 @@ on:
     branch:
       - development
   workflow_dispatch:
+  workflow_call:
+  
 
 jobs:
   build:

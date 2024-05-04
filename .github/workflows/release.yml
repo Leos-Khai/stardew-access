@@ -1,7 +1,7 @@
 name: Release
 
 on:
-  workflow-dispatch:
+  workflow_dispatch:
     inputs:
       pre-release:
         description: 'Set as pre-release i.e., beta or alpha'
@@ -26,12 +26,12 @@ on:
 jobs:
   build:
     name: Build
-    uses: ./.github/workflow/build.yml
+    uses: ./.github/workflows/build.yml
 
   publish:
     name: Publish
     needs: build
-    permission:
+    permissions:
       contents: write
     runs-on: ubuntu-latest
     steps:
@@ -41,7 +41,7 @@ jobs:
       - name: Download artifacts from build workflow run
         uses: actions/download-artifact@v4
         with:
-          name: stardew-access-nigthly
+          name: stardew-access-nightly
 
       - name: Display the downloaded artifact
         run: ls -la
