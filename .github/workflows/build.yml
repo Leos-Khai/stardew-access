@@ -1,0 +1,70 @@
+name: Build
+
+on:
+  push:
+    branch:
+      - development
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull source code
+        uses: actions/checkout@v4
+
+      - name: Install dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      # For some reason, if we use v6.0.x the build fails with 300+ syntax errors. And using 8.0.x doesn't.
+
+      - name: Install dotnet dependencies
+        run: dotnet restore
+
+      - name: Install ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Install kramdown
+        run: gem install kramdown
+
+      - name: Compile local docs
+        run: |
+          mkdir ./stardew-access/compiled-docs
+          cd ./docs/
+          ruby ./compiler_script.rb
+          cd ../
+
+      - name: Build the mod
+        run: |
+          dotnet build -p:BuildConfig=GITHUB
+          dotnet build -c Release -p:BuildConfig=GITHUB
+
+      - name: Set Environment Variables
+        run: |
+          echo "BUILD_TIME=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+
+      # Will only upload artifacts when manually called
+      - if: github.event_name == 'workflow_dispatch'
+        name: Rename build zips
+        run: |
+          cd './stardew-access/bin/Debug/net6.0/'
+          for f in *zip; do fnew=$(echo ${f} | sed 's/\ /-/g' | sed 's/.zip/-debug.zip/'); mv "${f}" "${fnew}"; done
+          ls *zip
+          cd '../../../../'
+          cd 'stardew-access/bin/Release/net6.0/'
+          for f in *zip; do fnew=$(echo ${f} | sed 's/\ /-/g'); mv "${f}" "${fnew}"; done
+          ls *zip
+          cd '../../../../'
+
+      # Will only upload artifacts when manually called
+      - if: github.event_name == 'workflow_dispatch'
+        name: Upload zips as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stardew-access-nightly-${{ env.BUILD_TIME }}
+          path: stardew-access/bin/**/net6.0/*.zip
