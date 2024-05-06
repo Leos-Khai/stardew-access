@@ -69,7 +69,7 @@ jobs:
         run: |
           for f in act_out/*zip; do if [[ $f == *'debug'* ]]; then echo DEBUG_FILE=$f >> $GITHUB_ENV; else echo MAIN_FILE=$f >> $GITHUB_ENV; fi; done
           if ${{ inputs.version != 'auto-fetch' }}; then RELEASE_TAG=${{ inputs.version }};
-          else RELEASE_TAG=$( jq -r '.Version' ./stardew-access/manifest.json ); fi
+          else RELEASE_TAG=v$( jq -r '.Version' ./stardew-access/manifest.json ); fi
           echo RELEASE_TAG=$RELEASE_TAG >> $GITHUB_ENV
           if ${{ inputs.pre-release == 'auto' }}; then if [[ $RELEASE_TAG == *'beta'* ]] || [[ $RELEASE_TAG == *'alpha'* ]]; then PRE_RELEASE=true; else PRE_RELEASE=false; fi;
           else if ${{ inputs.pre-release == 'true' }}; then PRE_RELEASE=true; else PRE_RELEASE=false; fi; fi
@@ -77,6 +77,7 @@ jobs:
           echo NEXUSMOD_NAME=Stardew Access $RELEASE_TAG >> $GITHUB_ENV
           echo "NEXUSMOD_VERSION=$( echo $RELEASE_TAG | cut -c 2- )" >> $GITHUB_ENV
           echo "GH_TITLE=$( if $PRE_RELEASE; then echo 'Beta '; fi )Release ${RELEASE_TAG}" >> $GITHUB_ENV
+          echo "NEXUSMOD_DESC=Uploaded to nexus by github actions at: $( date )\nCheckout the changlog at: https://github.com/khanshoaib3/stardew-access/releases/tag/$( echo $RELEASE_TAG )" >> $GITHUB_ENV
 
       - name: Rename build zips if necessary
         if: inputs.version != 'auto-fetch'
@@ -92,6 +93,7 @@ jobs:
           echo ${{ env.PRE_RELEASE }}
           echo ${{ env.GH_TITLE }}
           echo ${{ env.NEXUSMOD_NAME }}
+          printf "${{ env.NEXUSMOD_DESC }}"
           echo ${{ env.NEXUSMOD_VERSION }}
           echo ${{ env.NEXUSMOD_MODID }}
 
@@ -99,7 +101,7 @@ jobs:
         if: inputs.github-upload
         uses: softprops/action-gh-release@v2
         with:
-          body: This is temporary and will changed soon...
+          body: This is temporary and will be changed soon...
           prerelease: ${{ env.PRE_RELEASE }}
           files: |
             ${{ env.MAIN_FILE }}
@@ -116,9 +118,10 @@ jobs:
         with:
           dotnet-version: '6.0.x'
 
+      # Ref: https://docs.github.com/en/actions/learn-github-actions/expressions#example
       - name: Upload on Nexus
         if: inputs.nexus-upload
         run: |
           dotnet tool install -g Digitalroot.ModUploader
           drmu nexusmods check
-          drmu nexusmods upload ${{ env.NEXUSMOD_MODID }} "${{ env.MAIN_FILE }}" -f "${{ env.NEXUSMOD_NAME }}" -v "${{ env.NEXUSMOD_VERSION }}" -g stardewvalley -t Main -dmfu ${{ inputs.set-latest && '' || '-dvu' }} ${{ inputs.nexus-main-vortex && '' || '-dmv' }}
+          drmu nexusmods upload ${{ env.NEXUSMOD_MODID }} "${{ env.MAIN_FILE }}" -f "${{ env.NEXUSMOD_NAME }}" -v "${{ env.NEXUSMOD_VERSION }}" -g stardewvalley -t Main -d "${{ env.NEXUSMOD_DESC }}" -dmfu ${{ inputs.set-latest && '' || '-dvu' }} ${{ inputs.nexus-main-vortex && '' || '-dmv' }}

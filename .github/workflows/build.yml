@@ -1,9 +1,8 @@
 name: Build
 
 on:
-  push:
-    branch:
-      - development
+  pull_request:
+    types: [opened, reopened, synchronize]
   workflow_dispatch:
   workflow_call:
   
@@ -45,10 +44,6 @@ jobs:
         run: |
           dotnet build -p:BuildConfig=GITHUB
           dotnet build -c Release -p:BuildConfig=GITHUB
-
-      - name: Set Environment Variables
-        run: |
-          echo "BUILD_TIME=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
 
       # Will only upload artifacts when manually called
       - name: Rename build zips
