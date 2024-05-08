@@ -1,7 +1,13 @@
 name: Release
 
-# Refs: https://github.com/nektos/act/issues/329#issuecomment-1905955589
+# Refs:
+# Using act with github assets: https://github.com/nektos/act/issues/329#issuecomment-1905955589
+# ACT (for testing workflows locally): https://nektosact.com/
+# Example commands:
+# $ docker run -d --name artifact-server -p 8080:8080 --add-host host.docker.internal:host-gateway -e AUTH_KEY=foo ghcr.io/jefuller/artifact-server:latest
+# $ sudo act --env ACTIONS_RUNTIME_URL=http://host.docker.internal:8080/ --env ACTIONS_RUNTIME_TOKEN=foo --env ACTIONS_CACHE_URL=http://host.docker.internal:8080/ --artifact-server-path act_out -W ./.github/workflows/release.yml
 
+# Can only be called manually from the actions tab on github repo.
 on:
   workflow_dispatch:
     inputs:
@@ -59,12 +65,14 @@ jobs:
       - name: Pull source code
         uses: actions/checkout@v4
 
+      # Ref: https://github.com/actions/download-artifact
       - name: Download artifacts from build workflow run
         uses: actions/download-artifact@v4
         with:
           name: stardew-access-nightly
           path: act_out/
 
+      # Ref: https://github.com/khanshoaib3/minecraft-access/blob/bbe8bd7b97f960ad9fe48a36e69da2d4b6edadb8/.github/workflows/release.yml#L80
       - name: Set environment variables
         run: |
           for f in act_out/*zip; do if [[ $f == *'debug'* ]]; then echo DEBUG_FILE=$f >> $GITHUB_ENV; else echo MAIN_FILE=$f >> $GITHUB_ENV; fi; done
@@ -77,7 +85,7 @@ jobs:
           echo NEXUSMOD_NAME=Stardew Access $RELEASE_TAG >> $GITHUB_ENV
           echo "NEXUSMOD_VERSION=$( echo $RELEASE_TAG | cut -c 2- )" >> $GITHUB_ENV
           echo "GH_TITLE=$( if $PRE_RELEASE; then echo 'Beta '; fi )Release ${RELEASE_TAG}" >> $GITHUB_ENV
-          echo "NEXUSMOD_DESC=Uploaded to nexus by github actions at: $( date )\nCheckout the changlog at: https://github.com/khanshoaib3/stardew-access/releases/tag/$( echo $RELEASE_TAG )" >> $GITHUB_ENV
+          echo "NEXUSMOD_DESC=Uploaded to nexus by github actions at: $( date ).$( if ${{ inputs.github-upload }}; then echo Checkout the changlog at: https://github.com/khanshoaib3/stardew-access/releases/tag/$( echo $RELEASE_TAG ); fi )" >> $GITHUB_ENV
 
       - name: Rename build zips if necessary
         if: inputs.version != 'auto-fetch'
@@ -85,18 +93,19 @@ jobs:
           for f in act_out/*zip; do fname=act_out/stardew-access-$( echo ${{ env.RELEASE_TAG }} | cut -c 2- )$( if [[ $f == *'debug'* ]]; then echo -debug; fi ).zip; echo $fname; mv "${f}" "${fname}"; done
           for f in act_out/*zip; do if [[ $f == *'debug'* ]]; then echo DEBUG_FILE=$f >> $GITHUB_ENV; else echo MAIN_FILE=$f >> $GITHUB_ENV; fi; done
 
-      - name: Test envs
-        run: |
-          echo ${{ env.MAIN_FILE }}
-          echo ${{ env.DEBUG_FILE }}
-          echo ${{ env.RELEASE_TAG }}
-          echo ${{ env.PRE_RELEASE }}
-          echo ${{ env.GH_TITLE }}
-          echo ${{ env.NEXUSMOD_NAME }}
-          printf "${{ env.NEXUSMOD_DESC }}"
-          echo ${{ env.NEXUSMOD_VERSION }}
-          echo ${{ env.NEXUSMOD_MODID }}
+      # - name: Test envs
+      #   run: |
+      #     echo ${{ env.MAIN_FILE }}
+      #     echo ${{ env.DEBUG_FILE }}
+      #     echo ${{ env.RELEASE_TAG }}
+      #     echo ${{ env.PRE_RELEASE }}
+      #     echo ${{ env.GH_TITLE }}
+      #     echo ${{ env.NEXUSMOD_NAME }}
+      #     printf "${{ env.NEXUSMOD_DESC }}\n"
+      #     echo ${{ env.NEXUSMOD_VERSION }}
+      #     echo ${{ env.NEXUSMOD_MODID }}
 
+      # Ref: https://github.com/softprops/action-gh-release
       - name: Upload on GitHub
         if: inputs.github-upload
         uses: softprops/action-gh-release@v2
@@ -118,7 +127,9 @@ jobs:
         with:
           dotnet-version: '6.0.x'
 
-      # Ref: https://docs.github.com/en/actions/learn-github-actions/expressions#example
+      # Refs
+      # DRMU: https://github.com/Digitalroot-Valheim/Digitalroot.ModUploader
+      # Github ternary expression: https://docs.github.com/en/actions/learn-github-actions/expressions#example
       - name: Upload on Nexus
         if: inputs.nexus-upload
         run: |
