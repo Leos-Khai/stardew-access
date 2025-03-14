@@ -290,7 +290,8 @@ internal class GridMovement : FeatureBase
                 timer.Interval = TimerInterval;
                 timer.Start();
 
-                // Game1.playSound("doorOpen");
+                // TODO Replace with custom sound
+                Game1.playSound("doorOpen");
                 Game1.player.warpFarmer(warp);
                 is_warping = true;
             }
@@ -311,7 +312,8 @@ internal class GridMovement : FeatureBase
             }
             else
             {
-                // Game1.playSound("doorClose");
+                // TODO Replace with custom sound
+                Game1.playSound("doorClose");
             }
         }
     }
