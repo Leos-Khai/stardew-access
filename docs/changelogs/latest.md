@@ -7,7 +7,7 @@
 
 ### Feature Updates
 
-When "Sort By Proximity" is enabled, the ObjectTracker will focus on the closest item after map updates. E.G., after harvesting a specific crop, focus moves to the next closest crop, rather than the next closest crop of the same kind. Sorting alphabetically retains the old behavior.
+- When "Sort By Proximity" is enabled, the ObjectTracker will focus on the closest item after map updates. E.G., after harvesting a specific crop, focus moves to the next closest crop, rather than the next closest crop of the same kind. Sorting alphabetically retains the old behavior.
 - Improve object tracker's ability to detect locations in events
 - Egg hunt is now accessible with tracked eggs and adjustable timer with the config option `EggHuntTimerMultiplier`. This allows you to give yourself up to 3x longer to find eggs!
 
@@ -18,11 +18,11 @@ When "Sort By Proximity" is enabled, the ObjectTracker will focus on the closest
 - Fixed empty fish ponds being prefixed with "Error Item"; #424
 - Fixed social page reading tokenized string in place of relationship status.
 - Fixed map page not being read.
-ObjectTracker autorefresh is fixed! No more mashing the home button to force a refresh.
-Garden Pots have been moved from the "Other" category to the "Pending" category to better reflect their role.
-When holding a crop, pots will stay in "Pending" if they are unwatered. They will move to "Crops" once watered.
-When holding a bush such as a tea sapling, pots will appear in "Bushes".
-When any pot can be harvested, it will appear in "Ready".
+- ObjectTracker autorefresh is fixed! No more mashing the home button to force a refresh.
+- Garden Pots have been moved from the "Other" category to the "Pending" category to better reflect their role.
+- When holding a crop, pots will stay in "Pending" if they are unwatered. They will move to "Crops" once watered.
+- When holding a bush such as a tea sapling, pots will appear in "Bushes".
+- When any pot can be harvested, it will appear in "Ready".
 - Fixed a bug where the categories of certain items were not being applied correctly from `stardew-access/assets/TileData/QualifiedItemIds.json`
 - Removed incorrect door sound that plays when changing maps with grid movement on even when no door has been passed through.
 - Fix null references that crashed the object tracker  if a 3rd party mod added trees and then the 3rd party mod was removed. Now  trees are reported as 'unknown"
@@ -30,6 +30,8 @@ When any pot can be harvested, it will appear in "Ready".
 - Added more events to trigger object tracker refresh
 - Fixed the change of direction sound whilst using grid movement.
 - Fixed a bug where watered crops would remain in the pending category instead of moving to the crops category.
+- Temporarily reverted commit eab8f4f, as it was causing issues in some menus such as advanced game options
+- Reintroduced grid movement map transition sounds. Reverted 3fc12bbf54614be241356781dcf5b494aec1b862
 
 ### Tile Tracker Changes
 
