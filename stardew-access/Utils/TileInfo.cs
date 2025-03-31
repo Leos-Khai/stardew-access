@@ -303,6 +303,16 @@ public class TileInfo
                     if (dangerous && !hiding)
                         characterName = Translator.Instance.Translate("monster_name-dangerous", new { monster_name = characterName });
                     break;
+                case Pet pet:
+                    bool wasPetToday = pet.lastPetDay.TryGetValue(Game1.player.UniqueMultiplayerID, out int num) &&
+                                  num == Game1.Date.TotalDays;
+                    characterName = Translator.Instance.Translate("npc_name-pet", new
+                    {
+                        can_be_pet = wasPetToday ? 0 : 1,
+                        name = TokenParser.ParseText(pet.GetPetData().DisplayName)
+                    });
+                    characterCategory = wasPetToday ? CATEGORY.NPCs : CATEGORY.Pending;
+                    break;
                 case NPC npc:
                     if (npc is Horse horse)
                     {

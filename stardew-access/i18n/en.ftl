@@ -353,6 +353,10 @@ npc-farm_animal_info = {$has_produce ->
       *[other] {$age} months
     }
   }
+npc_name-pet = {$can_be_pet ->
+    [1] Pettable
+    *[other] {EMPTYSTRING()}
+  } {$name}
 npc_name-horse_with_no_name = A horse with no name
 monster_name-armored = Armored {$monster_name}
 monster_name-big_slime = Big {$colorful ->
