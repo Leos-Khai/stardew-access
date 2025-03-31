@@ -479,6 +479,11 @@ public class DynamicTiles
         {
             name = $"{ItemRegistry.GetData(fishPond.fishType.Value)?.DisplayName ?? ""}{name}";
             category = CATEGORY.Fishponds;
+            if (fishPond.output.Value is not null)
+            {
+                name = Translator.Instance.Translate("tile-harvestable-prefix", new { content = name });
+                category = CATEGORY.Ready;
+            }
         }
         // Check if the position matches the human door
         if (building.humanDoor.Value.X == offsetX && building.humanDoor.Value.Y == offsetY)
