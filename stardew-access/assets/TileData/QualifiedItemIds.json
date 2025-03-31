@@ -224,7 +224,7 @@
     ]
   },
   "interactables": {
-    "" : [
+    "": [
       "(BC)8",
       "(BC)94",
       "(BC)110",
@@ -313,79 +313,60 @@
       "(O)24",
       "(O)80",
       "(O)82",
-      "(O)86"
-    ],
-    "Frozen geode": [
-      "(O)76"
-    ],
-    "Magma geode": [
-      "(O)77"
-    ],
-    "Geode": [
-      "(O)75"
-    ],
-    "Omni geode node": [
-      "(O)819"
-    ],
-    "Mussel Node": [
-      "(O)25"
-    ],
-    "Radioactive Node": [
-      "(O)95"
-    ],
-    "Cinder shard node": [
+      "(O)86",
+      // Frozen geode
+      "(O)76",
+      // Magma geode
+      "(O)77",
+      // Geode
+      "(O)75",
+      // Omni geode node
+      "(O)819",
+      // Mussel Node
+      "(O)25",
+      // Radioactive Node
+      "(O)95",
+      // Cinder shard node
       "(O)843",
-      "(O)844"
-    ],
-    "Amethyst node": [
+      "(O)844",
+      // Amethyst node
       "(O)8",
-      "(O)66"
-    ],
-    "Aquamarine node": [
+      "(O)66",
+      // Aquamarine node
       "(O)14",
-      "(O)62"
-    ],
-    "Diamond node": [
-      "(O)2",
-      "(O)72"
-    ],
-    "Coal node": [
+      "(O)62",
+      // Coal node
       "(O)BasicCoalNode0",
-      "(O)BasicCoalNode1"
-    ],
-    "Emerald node": [
-      "(O)12",
-      "(O)60"
-    ],
-    "Gem node": [
-      "(O)44"
-    ],
-    "Jade node": [
-      "(O)6",
-      "(O)70"
-    ],
-    "Prismatic node": [
-      "(O)74"
-    ],
-    "Ruby node": [
-      "(O)4",
-      "(O)64"
-    ],
-    "Topaz node": [
-      "(O)10",
-      "(O)68"
-    ],
-    "Copper node": [
+      "(O)BasicCoalNode1",
+      "(O)VolcanoCoalNode0",
+      "(O)VolcanoCoalNode1",
+      // Copper node
       "(O)751",
-      "(O)849"
-    ],
-    "Gold node": [
-      "(O)764"
-    ],
-    "Iridium node": [
-      "(O)765"
-    ],
-    "Iron node": [
+      "(O)849",
+      // Diamond node
+      "(O)2",
+      "(O)72",
+      // Emerald node
+      "(O)12",
+      "(O)60",
+      // Gem node
+      "(O)44",
+      // Jade node
+      "(O)6",
+      "(O)70",
+      // Prismatic node
+      "(O)74",
+      // Ruby node
+      "(O)4",
+      "(O)64",
+      // Topaz node
+      "(O)10",
+      "(O)68",
+      // Gold node
+      "(O)764",
+      // Iridium node
+      "(O)765",
+      // Iron node
       "(O)290",
       "(O)850"
     ]
